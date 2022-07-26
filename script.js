@@ -1,100 +1,132 @@
-// Initialize the Variables
-let songIndex = 0;
-let audioElement = new Audio('./music/1.mp3');
-let masterPlay = document.getElementById('masterPlay');
-let myProgressBar = document.getElementById('myProgressBar');
-let gif = document.getElementById('gif');
-let masterSongName = document.getElementById('masterSongName');
-let songItems = Array.from(document.getElementsByClassName('songItem'));
+let now_playing = document.querySelector(".now-playing");
+let track_art = document.querySelector(".track-art");
+let track_name = document.querySelector(".track-name");
+let track_art_side = document.getElementsByClassName("track-art-side");
+let track_side = document.getElementsByClassName("track-side");
+let track_artist = document.querySelector(".track-artist");
 
-let songs = [
-    {songName: "Đâu đâu cũng là em", filePath: "./music/1.mp3", coverPath: "./picture/img1.jpg" ,timestamp: "3:24"},
-    {songName: "Xin một lần ngoại lệ", filePath: "./music/2.mp3", coverPath: "./picture/img2.jpg" ,timestamp: "5:20"}
-]
+let playpause_btn = document.querySelector(".playpause-track");
+let next_btn = document.querySelector(".next-track");
+let prev_btn = document.querySelector(".prev-track");
 
-songItems.forEach((element, i)=>{ 
-    element.getElementsByTagName("img")[0].src = songs[i].coverPath; 
-    element.getElementsByClassName("songName")[0].innerText = songs[i].songName; 
-    element.getElementsByClassName("timestamp")[0].innerText = songs[i].timestamp; 
-    
-})
- 
+let seek_slider = document.querySelector(".seek_slider");
+let volume_slider = document.querySelector(".volume_slider");
+let curr_time = document.querySelector(".current-time");
+let total_duration = document.querySelector(".total-duration");
 
-// Handle play/pause click
-masterPlay.addEventListener('click', ()=>{
-    if(audioElement.paused || audioElement.currentTime<=0){
-        audioElement.play();
-        masterPlay.classList.remove('fa-play-circle');
-        masterPlay.classList.add('fa-pause-circle');
-    }
-    else{
-        audioElement.pause();
-        masterPlay.classList.remove('fa-pause-circle');
-        masterPlay.classList.add('fa-play-circle');
+let track_index = 0;
+let isPlaying = false;
+let updateTimer;
 
-    }
-})
-// Listen to Events
-audioElement.addEventListener('timeupdate', ()=>{ 
-    // Update Seekbar
-    progress = parseInt((audioElement.currentTime/audioElement.duration)* 100); 
-    myProgressBar.value = progress;
-})
+// Create new audio element
+let curr_track = document.createElement('audio');
 
-myProgressBar.addEventListener('change', ()=>{
-    audioElement.currentTime = myProgressBar.value * audioElement.duration/100;
-})
+// Define the tracks that have to be played
+let track_list = [
+  {
+    name: "Đâu đâu cũng là em",
+    artist: "YoungCaptian",
+    image: "./picture/img1.jpg",
+    path: "./music/1.mp3"
+  },
+  {
+    name: "Xin một lần ngoại lệ",
+    artist: "Yuno",
+    image: "./picture/img2.jpg",
+    path: "./music/2.mp3"
+  },
+];
 
-const makeAllPlays = ()=>{
-    Array.from(document.getElementsByClassName('songItemPlay')).forEach((element)=>{
-        element.classList.remove('fa-pause-circle');
-        element.classList.add('fa-play-circle');
-    })
+function sidetrack() {
+    track_art_side.style.backgroundImage = "url(" + track_list.image + ")";
+    track_side.textContent = track_list.name;
+}
+function loadTrack(track_index) {
+  clearInterval(updateTimer);
+  resetValues();
+  curr_track.src = track_list[track_index].path;
+  curr_track.load();
+
+  track_art.style.backgroundImage = "url(" + track_list[track_index].image + ")";
+  track_name.textContent = track_list[track_index].name;
+  track_artist.textContent = track_list[track_index].artist;
+  now_playing.textContent = "PLAYING " + (track_index + 1) + " OF " + track_list.length;
+  
+  updateTimer = setInterval(seekUpdate, 1000);
+  curr_track.addEventListener("ended", nextTrack);
 }
 
-Array.from(document.getElementsByClassName('songItemPlay')).forEach((element)=>{
-    element.addEventListener('click', (e)=>{ 
-        makeAllPlays();
-        songIndex = parseInt(e.target.id);
-        e.target.classList.remove('fa-play-circle');
-        e.target.classList.add('fa-pause-circle');
-        audioElement.src = `./music/${songIndex+1}.mp3`;
-        masterSongName.innerText = songs[songIndex].songName;
-        audioElement.currentTime = 0;
-        audioElement.play();
-        gif.style.opacity = 1;
-        masterPlay.classList.remove('fa-play-circle');
-        masterPlay.classList.add('fa-pause-circle');
-    })
-})
+function resetValues() {
+  curr_time.textContent = "00:00";
+  total_duration.textContent = "00:00";
+  seek_slider.value = 0;
+}
 
-document.getElementById('next').addEventListener('click', ()=>{
-    if(songIndex>=9){
-        songIndex = 0
-    }
-    else{
-        songIndex += 1;
-    }
-    audioElement.src = `./music/${songIndex+1}.mp3`;
-    masterSongName.innerText = songs[songIndex].songName;
-    audioElement.currentTime = 0;
-    audioElement.play();
-    masterPlay.classList.remove('fa-play-circle');
-    masterPlay.classList.add('fa-pause-circle');
+// Load the first track in the tracklist
+loadTrack(track_index);
 
-})
+function playpauseTrack() {
+  if (!isPlaying) playTrack();
+  else pauseTrack();
+}
 
-document.getElementById('previous').addEventListener('click', ()=>{
-    if(songIndex<=0){
-        songIndex = 0
-    }
-    else{
-        songIndex -= 1;
-    }
-    audioElement.src = `./music/${songIndex+1}.mp3`;
-    masterSongName.innerText = songs[songIndex].songName;
-    audioElement.currentTime = 0;
-    audioElement.play();
-    masterPlay.classList.remove('fa-play-circle');
-    masterPlay.classList.add('fa-pause-circle');
-})
+function playTrack() {
+  curr_track.play();
+  isPlaying = true;
+  playpause_btn.innerHTML = '<i class="fa fa-pause-circle fa-2x"></i>';
+}
+
+function pauseTrack() {
+  curr_track.pause();
+  isPlaying = false;
+  playpause_btn.innerHTML = '<i class="fa fa-play-circle fa-2x"></i>';;
+}
+
+function nextTrack() {
+  if (track_index < track_list.length - 1)
+    track_index += 1;
+  else track_index = 0;
+  loadTrack(track_index);
+  playTrack();
+}
+
+function prevTrack() {
+  if (track_index > 0)
+    track_index -= 1;
+  else track_index = track_list.length;
+  loadTrack(track_index);
+  playTrack();
+}
+
+function seekTo() {
+  let seekto = curr_track.duration * (seek_slider.value / 100);
+  curr_track.currentTime = seekto;
+}
+
+function setVolume() {
+  curr_track.volume = volume_slider.value / 100;
+}
+
+function seekUpdate() {
+  let seekPosition = 0;
+
+  if (!isNaN(curr_track.duration)) {
+    seekPosition = curr_track.currentTime * (100 / curr_track.duration);
+
+    seek_slider.value = seekPosition;
+
+    let currentMinutes = Math.floor(curr_track.currentTime / 60);
+    let currentSeconds = Math.floor(curr_track.currentTime - currentMinutes * 60);
+    let durationMinutes = Math.floor(curr_track.duration / 60);
+    let durationSeconds = Math.floor(curr_track.duration - durationMinutes * 60);
+
+    if (currentSeconds < 10) { currentSeconds = "0" + currentSeconds; }
+    if (durationSeconds < 10) { durationSeconds = "0" + durationSeconds; }
+    if (currentMinutes < 10) { currentMinutes = "0" + currentMinutes; }
+    if (durationMinutes < 10) { durationMinutes = "0" + durationMinutes; }
+
+    curr_time.textContent = currentMinutes + ":" + currentSeconds;
+    total_duration.textContent = durationMinutes + ":" + durationSeconds;
+  }
+}
+
