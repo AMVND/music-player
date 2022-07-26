@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Player</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li class="brand">
+          <img src="./images/logo.png" alt="" /> MUSIC PLAYER
+        </li>
+      </ul>
+    </nav>
+      <div class="container" id="container" style="position:fixed" >
+        <div class="songList">
+          <h1>DANH SÁCH NHẠC </h1>
+          <div class="songItemContainer">
+            <div class="songItem">
+              <img alt="1" src="./picture/#" />
+              <span class="songName"></span>
+              <span class="songlistplay"
+                ><span class="timestamp"
+                  ><i id="0" class="far songItemPlay fa-play-circle"></i> </span
+              ></span>
+            </div>
+            <div class="songItem" id="songItem">
+              <img alt="2" src="./picture/#" />
+              <span class="songName"></span>
+              <span class="songlistplay"
+                ><span class="timestamp"
+                  </span
+              ></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom">
+        <div class="songInfo">
+          <span id="masterSongName">Đâu đâu cũng là em</span>
+        </div>
+        <input
+          type="range"
+          name="range"
+          id="myProgressBar"
+          min="0"
+          value="0"
+          max="100"
+        /> <span id="demo"></span>
+        <div class="icons">
+          <!-- fontawesome icons -->
+          <i class="fas fa-fast-backward" id="previous"></i>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <i class="far fa-2x fa-play-circle" id="masterPlay"></i>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <i class="fas fa-fast-forward" id="next"></i>
+        </div>
+      </div>
+    <script src="./script.js"></script>
+  </body>
+</html>
